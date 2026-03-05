@@ -13,33 +13,44 @@ const UNIT = CUBIE_SIZE + GAP;
 
 // Hamle -> döndürme ekseni ve yönü
 const MOVE_CONFIG = {
-  U:    { axis: [0, 1, 0], angle: -Math.PI / 2, filter: (_x, y) => y === 1 },
-  "U'": { axis: [0, 1, 0], angle:  Math.PI / 2, filter: (_x, y) => y === 1 },
-  U2:   { axis: [0, 1, 0], angle: -Math.PI,     filter: (_x, y) => y === 1 },
-  D:    { axis: [0, 1, 0], angle:  Math.PI / 2, filter: (_x, y) => y === -1 },
+  U: { axis: [0, 1, 0], angle: -Math.PI / 2, filter: (_x, y) => y === 1 },
+  "U'": { axis: [0, 1, 0], angle: Math.PI / 2, filter: (_x, y) => y === 1 },
+  U2: { axis: [0, 1, 0], angle: -Math.PI, filter: (_x, y) => y === 1 },
+  D: { axis: [0, 1, 0], angle: Math.PI / 2, filter: (_x, y) => y === -1 },
   "D'": { axis: [0, 1, 0], angle: -Math.PI / 2, filter: (_x, y) => y === -1 },
-  D2:   { axis: [0, 1, 0], angle:  Math.PI,     filter: (_x, y) => y === -1 },
-  R:    { axis: [1, 0, 0], angle: -Math.PI / 2, filter: (x) => x === 1 },
-  "R'": { axis: [1, 0, 0], angle:  Math.PI / 2, filter: (x) => x === 1 },
-  R2:   { axis: [1, 0, 0], angle: -Math.PI,     filter: (x) => x === 1 },
-  L:    { axis: [1, 0, 0], angle:  Math.PI / 2, filter: (x) => x === -1 },
+  D2: { axis: [0, 1, 0], angle: Math.PI, filter: (_x, y) => y === -1 },
+  R: { axis: [1, 0, 0], angle: -Math.PI / 2, filter: (x) => x === 1 },
+  "R'": { axis: [1, 0, 0], angle: Math.PI / 2, filter: (x) => x === 1 },
+  R2: { axis: [1, 0, 0], angle: -Math.PI, filter: (x) => x === 1 },
+  L: { axis: [1, 0, 0], angle: Math.PI / 2, filter: (x) => x === -1 },
   "L'": { axis: [1, 0, 0], angle: -Math.PI / 2, filter: (x) => x === -1 },
-  L2:   { axis: [1, 0, 0], angle:  Math.PI,     filter: (x) => x === -1 },
-  F:    { axis: [0, 0, 1], angle: -Math.PI / 2, filter: (_x, _y, z) => z === 1 },
-  "F'": { axis: [0, 0, 1], angle:  Math.PI / 2, filter: (_x, _y, z) => z === 1 },
-  F2:   { axis: [0, 0, 1], angle: -Math.PI,     filter: (_x, _y, z) => z === 1 },
-  B:    { axis: [0, 0, 1], angle:  Math.PI / 2, filter: (_x, _y, z) => z === -1 },
-  "B'": { axis: [0, 0, 1], angle: -Math.PI / 2, filter: (_x, _y, z) => z === -1 },
-  B2:   { axis: [0, 0, 1], angle:  Math.PI,     filter: (_x, _y, z) => z === -1 },
+  L2: { axis: [1, 0, 0], angle: Math.PI, filter: (x) => x === -1 },
+  F: { axis: [0, 0, 1], angle: -Math.PI / 2, filter: (_x, _y, z) => z === 1 },
+  "F'": { axis: [0, 0, 1], angle: Math.PI / 2, filter: (_x, _y, z) => z === 1 },
+  F2: { axis: [0, 0, 1], angle: -Math.PI, filter: (_x, _y, z) => z === 1 },
+  B: { axis: [0, 0, 1], angle: Math.PI / 2, filter: (_x, _y, z) => z === -1 },
+  "B'": {
+    axis: [0, 0, 1],
+    angle: -Math.PI / 2,
+    filter: (_x, _y, z) => z === -1,
+  },
+  B2: { axis: [0, 0, 1], angle: Math.PI, filter: (_x, _y, z) => z === -1 },
 };
 
 function getCubieFaceColors(cubeState, x, y, z) {
-  const colors = ["#1a1a2e", "#1a1a2e", "#1a1a2e", "#1a1a2e", "#1a1a2e", "#1a1a2e"];
-  if (x === 1)  colors[0] = COLORS[cubeState.R[(1 - y) * 3 + (1 - z)]];
+  const colors = [
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+  ];
+  if (x === 1) colors[0] = COLORS[cubeState.R[(1 - y) * 3 + (1 - z)]];
   if (x === -1) colors[1] = COLORS[cubeState.L[(1 - y) * 3 + (z + 1)]];
-  if (y === 1)  colors[2] = COLORS[cubeState.U[(1 - z) * 3 + (x + 1)]];
+  if (y === 1) colors[2] = COLORS[cubeState.U[(1 - z) * 3 + (x + 1)]];
   if (y === -1) colors[3] = COLORS[cubeState.D[(z + 1) * 3 + (x + 1)]];
-  if (z === 1)  colors[4] = COLORS[cubeState.F[(1 - y) * 3 + (x + 1)]];
+  if (z === 1) colors[4] = COLORS[cubeState.F[(1 - y) * 3 + (x + 1)]];
   if (z === -1) colors[5] = COLORS[cubeState.B[(1 - y) * 3 + (1 - x)]];
   return colors;
 }
@@ -52,15 +63,19 @@ function Cubie({ position, faceColors, highlighted }) {
           color: new THREE.Color(color),
           roughness: 0.25,
           metalness: 0.05,
-          emissive: highlighted ? new THREE.Color(color) : new THREE.Color("#000000"),
+          emissive: highlighted
+            ? new THREE.Color(color)
+            : new THREE.Color("#000000"),
           emissiveIntensity: highlighted ? 0.15 : 0,
-        })
+        }),
     );
   }, [faceColors, highlighted]);
 
   return (
     <mesh position={position} material={materials}>
-      <roundedBoxGeometry args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE, 4, 0.08]} />
+      <roundedBoxGeometry
+        args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE, 4, 0.08]}
+      />
     </mesh>
   );
 }
@@ -70,7 +85,10 @@ function AnimatedLayer({ cubies, moveConfig, animDuration, onComplete }) {
   const groupRef = useRef();
   const progressRef = useRef(0);
   const completedRef = useRef(false);
-  const axis = useMemo(() => new THREE.Vector3(...moveConfig.axis), [moveConfig]);
+  const axis = useMemo(
+    () => new THREE.Vector3(...moveConfig.axis),
+    [moveConfig],
+  );
 
   useFrame((_, delta) => {
     if (!groupRef.current || completedRef.current) return;
@@ -92,16 +110,50 @@ function AnimatedLayer({ cubies, moveConfig, animDuration, onComplete }) {
   return (
     <group ref={groupRef}>
       {cubies.map(({ pos, colors, key }) => (
-        <Cubie key={key} position={pos} faceColors={colors} highlighted={true} />
+        <Cubie
+          key={key}
+          position={pos}
+          faceColors={colors}
+          highlighted={true}
+        />
       ))}
     </group>
   );
 }
 
-function CubeScene({ cubeState, currentMove, animDuration, onAnimComplete, highlightFace }) {
-  const [animating, setAnimating] = useState(false);
-  const [animMove, setAnimMove] = useState(null);
+/**
+ * CubeScene: Tamamen prop-driven animasyon sistemi.
+ * - cubeState: Animasyonsuz durumda gösterilecek küp state'i
+ * - preAnimState: Animasyon başlangıç state'i (animasyon varsa)
+ * - currentMove: Animasyon yapılacak hamle (null ise animasyon yok)
+ * - Animasyon sırasında preAnimState gösterilir, katman döner,
+ *   animasyon bitince onAnimComplete çağrılır ve parent cubeState'i günceller
+ */
+function CubeScene({
+  cubeState,
+  preAnimState,
+  currentMove,
+  animDuration,
+  onAnimComplete,
+  highlightFace,
+}) {
+  // Animasyon aktifse preAnimState kullan, değilse cubeState
+  const renderState = currentMove && preAnimState ? preAnimState : cubeState;
   const animIdRef = useRef(0);
+  const [localAnimId, setLocalAnimId] = useState(0);
+  const isAnimating = !!(
+    currentMove &&
+    MOVE_CONFIG[currentMove] &&
+    preAnimState
+  );
+
+  // currentMove değiştiğinde animasyon ID'sini artır (AnimatedLayer'ı yeniden oluştur)
+  useEffect(() => {
+    if (currentMove && MOVE_CONFIG[currentMove]) {
+      animIdRef.current += 1;
+      setLocalAnimId(animIdRef.current);
+    }
+  }, [currentMove]);
 
   const allCubies = useMemo(() => {
     const result = [];
@@ -110,41 +162,31 @@ function CubeScene({ cubeState, currentMove, animDuration, onAnimComplete, highl
         for (let z = -1; z <= 1; z++) {
           if (x === 0 && y === 0 && z === 0) continue;
           const pos = [x * UNIT, y * UNIT, z * UNIT];
-          const colors = getCubieFaceColors(cubeState, x, y, z);
+          const colors = getCubieFaceColors(renderState, x, y, z);
           result.push({ pos, colors, key: `${x}_${y}_${z}`, x, y, z });
         }
       }
     }
     return result;
-  }, [cubeState]);
+  }, [renderState]);
 
-  useEffect(() => {
-    if (currentMove && MOVE_CONFIG[currentMove]) {
-      animIdRef.current += 1;
-      setAnimMove(currentMove);
-      setAnimating(true);
-    } else {
-      setAnimating(false);
-      setAnimMove(null);
-    }
-  }, [currentMove]);
-
-  const handleAnimComplete = useCallback(() => {
-    setAnimating(false);
-    setAnimMove(null);
-    onAnimComplete?.();
-  }, [onAnimComplete]);
-
-  const moveConfig = animMove ? MOVE_CONFIG[animMove] : null;
+  const moveConfig = currentMove ? MOVE_CONFIG[currentMove] : null;
   const layerCubies = [];
   const staticCubies = [];
 
   for (const cubie of allCubies) {
-    if (animating && moveConfig && moveConfig.filter(cubie.x, cubie.y, cubie.z)) {
+    if (
+      isAnimating &&
+      moveConfig &&
+      moveConfig.filter(cubie.x, cubie.y, cubie.z)
+    ) {
       layerCubies.push(cubie);
     } else {
-      const isHighlighted = !animating && highlightFace && MOVE_CONFIG[highlightFace]
-        && MOVE_CONFIG[highlightFace].filter(cubie.x, cubie.y, cubie.z);
+      const isHighlighted =
+        !isAnimating &&
+        highlightFace &&
+        MOVE_CONFIG[highlightFace] &&
+        MOVE_CONFIG[highlightFace].filter(cubie.x, cubie.y, cubie.z);
       staticCubies.push({ ...cubie, highlighted: !!isHighlighted });
     }
   }
@@ -152,27 +194,45 @@ function CubeScene({ cubeState, currentMove, animDuration, onAnimComplete, highl
   return (
     <group rotation={[Math.PI / 6, -Math.PI / 4, 0]}>
       {staticCubies.map(({ pos, colors, key, highlighted }) => (
-        <Cubie key={key} position={pos} faceColors={colors} highlighted={highlighted} />
+        <Cubie
+          key={key}
+          position={pos}
+          faceColors={colors}
+          highlighted={highlighted}
+        />
       ))}
 
-      {animating && moveConfig && (
+      {isAnimating && moveConfig && (
         <AnimatedLayer
-          key={`anim-${animIdRef.current}`}
+          key={`anim-${localAnimId}`}
           cubies={layerCubies}
           moveConfig={moveConfig}
           animDuration={animDuration}
-          onComplete={handleAnimComplete}
+          onComplete={onAnimComplete}
         />
       )}
 
-      {!animating && layerCubies.map(({ pos, colors, key }) => (
-        <Cubie key={key} position={pos} faceColors={colors} highlighted={false} />
-      ))}
+      {!isAnimating &&
+        layerCubies.map(({ pos, colors, key }) => (
+          <Cubie
+            key={key}
+            position={pos}
+            faceColors={colors}
+            highlighted={false}
+          />
+        ))}
     </group>
   );
 }
 
-export default function Cube3D({ cubeState, currentMove, animDuration = 0.5, onAnimComplete, highlightFace }) {
+export default function Cube3D({
+  cubeState,
+  preAnimState,
+  currentMove,
+  animDuration = 0.5,
+  onAnimComplete,
+  highlightFace,
+}) {
   return (
     <div className="w-full h-[350px] md:h-[420px]">
       <Canvas camera={{ position: [4.5, 3.5, 4.5], fov: 42 }}>
@@ -182,6 +242,7 @@ export default function Cube3D({ cubeState, currentMove, animDuration = 0.5, onA
         <pointLight position={[0, 5, 0]} intensity={0.3} color="#667eea" />
         <CubeScene
           cubeState={cubeState}
+          preAnimState={preAnimState}
           currentMove={currentMove}
           animDuration={animDuration}
           onAnimComplete={onAnimComplete}

@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "tombala-33124",
+    "site": "rubikcoz",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [

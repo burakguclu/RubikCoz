@@ -1,5 +1,12 @@
 {
   "projects": {
     "default": "tombala-33124"
+  },
+  "targets": {
+    "tombala-33124": {
+      "hosting": {
+        "rubikcoz": ["rubikcoz"]
+      }
+    }
   }
 }

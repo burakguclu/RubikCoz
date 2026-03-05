@@ -17,7 +17,10 @@ export default function SolutionDisplay({
 
   const progress = (currentStep / moves.length) * 100;
   const prevMove = currentStep > 1 ? moves[currentStep - 2] : null;
-  const currentMove = currentStep > 0 && currentStep <= moves.length ? moves[currentStep - 1] : null;
+  const currentMove =
+    currentStep > 0 && currentStep <= moves.length
+      ? moves[currentStep - 1]
+      : null;
   const nextMove = currentStep < moves.length ? moves[currentStep] : null;
 
   return (
@@ -58,7 +61,10 @@ export default function SolutionDisplay({
           {prevMove ? (
             <span
               className="text-lg font-bold font-mono px-3 py-1 rounded-lg opacity-40"
-              style={{ backgroundColor: getMoveColor(prevMove) + "33", color: getMoveColor(prevMove) }}
+              style={{
+                backgroundColor: getMoveColor(prevMove) + "33",
+                color: getMoveColor(prevMove),
+              }}
             >
               {prevMove}
             </span>
@@ -94,7 +100,10 @@ export default function SolutionDisplay({
           {nextMove ? (
             <span
               className="text-lg font-bold font-mono px-3 py-1 rounded-lg opacity-40"
-              style={{ backgroundColor: getMoveColor(nextMove) + "33", color: getMoveColor(nextMove) }}
+              style={{
+                backgroundColor: getMoveColor(nextMove) + "33",
+                color: getMoveColor(nextMove),
+              }}
             >
               {nextMove}
             </span>
@@ -115,25 +124,49 @@ export default function SolutionDisplay({
 
       {/* Kontrol butonları */}
       <div className="flex gap-2 justify-center items-center mb-4">
-        <button className="btn-secondary text-sm px-3 py-2" onClick={onReset} title="Başa dön">
+        <button
+          className="btn-secondary text-sm px-3 py-2"
+          onClick={onReset}
+          title="Başa dön"
+        >
           ⏮
         </button>
-        <button className="btn-secondary text-sm px-3 py-2" onClick={onPrev} title="Önceki adım">
+        <button
+          className="btn-secondary text-sm px-3 py-2"
+          onClick={onPrev}
+          title="Önceki adım"
+        >
           ⏪
         </button>
         {isPlaying ? (
-          <button className="btn-danger text-sm px-5 py-2 text-base" onClick={onPause} title="Duraklat">
+          <button
+            className="btn-danger text-sm px-5 py-2 text-base"
+            onClick={onPause}
+            title="Duraklat"
+          >
             ⏸
           </button>
         ) : (
-          <button className="btn-success text-sm px-5 py-2 text-base" onClick={onPlay} title="Oynat">
+          <button
+            className="btn-success text-sm px-5 py-2 text-base"
+            onClick={onPlay}
+            title="Oynat"
+          >
             ▶
           </button>
         )}
-        <button className="btn-secondary text-sm px-3 py-2" onClick={onNext} title="Sonraki adım">
+        <button
+          className="btn-secondary text-sm px-3 py-2"
+          onClick={onNext}
+          title="Sonraki adım"
+        >
           ⏩
         </button>
-        <button className="btn-secondary text-sm px-3 py-2" onClick={() => onStepClick(moves.length)} title="Sona git">
+        <button
+          className="btn-secondary text-sm px-3 py-2"
+          onClick={() => onStepClick(moves.length)}
+          title="Sona git"
+        >
           ⏭
         </button>
       </div>
@@ -173,7 +206,10 @@ export default function SolutionDisplay({
                   ${isDone && !isActive ? "opacity-50" : ""}
                 `}
                 style={{
-                  backgroundColor: isDone || isActive ? getMoveColor(move) : "rgba(255,255,255,0.07)",
+                  backgroundColor:
+                    isDone || isActive
+                      ? getMoveColor(move)
+                      : "rgba(255,255,255,0.07)",
                   color: isDone || isActive ? "#fff" : "rgba(255,255,255,0.4)",
                 }}
                 onClick={() => onStepClick(index + 1)}

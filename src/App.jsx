@@ -33,8 +33,10 @@ function App() {
   const [solverReady, setSolverReady] = useState(false);
   const [speed, setSpeed] = useState(1.0);
   const [animatingMove, setAnimatingMove] = useState(null);
+  const [preAnimState, setPreAnimState] = useState(null);
   const playIntervalRef = useRef(null);
   const baseCubeRef = useRef(null);
+  const prevStepRef = useRef(0);
 
   // Küp durumunu 3D'de göster
   const currentDisplayState = displayState || cubeState;
@@ -95,39 +97,54 @@ function App() {
   // Adım değiştiğinde küp durumunu güncelle
   useEffect(() => {
     if (solutionMoves.length > 0 && baseCubeRef.current) {
-      const movesToApply = solutionMoves.slice(0, currentStep);
-      const newState = applyMoves(baseCubeRef.current, movesToApply);
-      setDisplayState(newState);
+      const prevStep = prevStepRef.current;
+      const isForwardByOne = currentStep === prevStep + 1;
+      prevStepRef.current = currentStep;
 
-      // Animasyon tetikle — mevcut adımın hamlesini animasyonla göster
-      if (currentStep > 0) {
-        // Animasyon önceki durumdan başlar, bu yüzden bir önceki durumu göstermeliyiz
-        const prevState = applyMoves(baseCubeRef.current, solutionMoves.slice(0, currentStep - 1));
-        setDisplayState(prevState);
+      // Her zaman hedef state'i hesapla
+      const targetState = applyMoves(
+        baseCubeRef.current,
+        solutionMoves.slice(0, currentStep),
+      );
+
+      if (isForwardByOne && currentStep > 0) {
+        // Sadece +1 ileri giderken animasyon göster
+        const beforeState = applyMoves(
+          baseCubeRef.current,
+          solutionMoves.slice(0, currentStep - 1),
+        );
+        setPreAnimState(beforeState);
+        setDisplayState(targetState); // Animasyon bitince gösterilecek state
         setAnimatingMove(solutionMoves[currentStep - 1]);
       } else {
+        // Geri, atlama veya sıfırlama → direkt state güncelle, animasyon yok
+        setDisplayState(targetState);
         setAnimatingMove(null);
+        setPreAnimState(null);
       }
+    } else if (solutionMoves.length === 0) {
+      prevStepRef.current = 0;
     }
   }, [currentStep, solutionMoves]);
 
-  // Animasyon tamamlandığında son durumu göster
+  // Animasyon tamamlandığında: animasyonu temizle, displayState zaten doğru
   const handleAnimComplete = useCallback(() => {
-    if (solutionMoves.length > 0 && baseCubeRef.current && currentStep > 0) {
-      const newState = applyMoves(baseCubeRef.current, solutionMoves.slice(0, currentStep));
-      setDisplayState(newState);
-    }
     setAnimatingMove(null);
-  }, [currentStep, solutionMoves]);
+    setPreAnimState(null);
+  }, []);
 
-  // Otomatik oynatma
+  // Otomatik oynatma — animasyon bitmeden sonraki adıma geçme
   useEffect(() => {
     if (isPlaying && currentStep < solutionMoves.length && !animatingMove) {
       const delay = Math.max(200, 1200 / speed);
       playIntervalRef.current = setTimeout(() => {
         setCurrentStep((prev) => prev + 1);
       }, delay);
-    } else if (isPlaying && currentStep >= solutionMoves.length) {
+    } else if (
+      isPlaying &&
+      currentStep >= solutionMoves.length &&
+      !animatingMove
+    ) {
       setIsPlaying(false);
     }
     return () => clearTimeout(playIntervalRef.current);
@@ -321,11 +338,14 @@ function App() {
               <div className="glass-card p-2">
                 <Cube3D
                   cubeState={currentDisplayState}
+                  preAnimState={preAnimState}
                   currentMove={animatingMove}
                   animDuration={Math.max(0.15, 0.5 / speed)}
                   onAnimComplete={handleAnimComplete}
                   highlightFace={
-                    solutionMoves.length > 0 && currentStep < solutionMoves.length && !animatingMove
+                    solutionMoves.length > 0 &&
+                    currentStep < solutionMoves.length &&
+                    !animatingMove
                       ? solutionMoves[currentStep]
                       : null
                   }
@@ -333,9 +353,11 @@ function App() {
               </div>
 
               {/* Yön Rehberi — aktif hamle */}
-              {solutionMoves.length > 0 && currentStep > 0 && currentStep <= solutionMoves.length && (
-                <MoveGuide move={solutionMoves[currentStep - 1]} />
-              )}
+              {solutionMoves.length > 0 &&
+                currentStep > 0 &&
+                currentStep <= solutionMoves.length && (
+                  <MoveGuide move={solutionMoves[currentStep - 1]} />
+                )}
 
               {/* Çözüm gösterimi */}
               {solution && (

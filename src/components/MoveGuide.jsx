@@ -56,8 +56,23 @@ function Arrow180({ cx, cy, color, size = 28 }) {
   const r = size;
   return (
     <g>
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke={color} strokeWidth="3" strokeDasharray="6 3" />
-      <text x={cx} y={cy + 5} textAnchor="middle" fill={color} fontSize="16" fontWeight="bold">
+      <circle
+        cx={cx}
+        cy={cy}
+        r={r}
+        fill="none"
+        stroke={color}
+        strokeWidth="3"
+        strokeDasharray="6 3"
+      />
+      <text
+        x={cx}
+        y={cy + 5}
+        textAnchor="middle"
+        fill={color}
+        fontSize="16"
+        fontWeight="bold"
+      >
         180°
       </text>
     </g>
@@ -139,11 +154,26 @@ function CubeIsometric({ face, modifier, color }) {
     <svg viewBox="-15 5 130 140" className="w-full h-full">
       {/* Küp çerçevesi */}
       {/* Üst yüz */}
-      <polygon points="50,20 100,45 50,70 0,45" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+      <polygon
+        points="50,20 100,45 50,70 0,45"
+        fill="rgba(255,255,255,0.05)"
+        stroke="rgba(255,255,255,0.3)"
+        strokeWidth="1"
+      />
       {/* Sol yüz */}
-      <polygon points="0,45 50,70 50,130 0,105" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+      <polygon
+        points="0,45 50,70 50,130 0,105"
+        fill="rgba(255,255,255,0.03)"
+        stroke="rgba(255,255,255,0.3)"
+        strokeWidth="1"
+      />
       {/* Sağ yüz */}
-      <polygon points="50,70 100,45 100,105 50,130" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.3)" strokeWidth="1" />
+      <polygon
+        points="50,70 100,45 100,105 50,130"
+        fill="rgba(255,255,255,0.08)"
+        stroke="rgba(255,255,255,0.3)"
+        strokeWidth="1"
+      />
 
       {/* Vurgulu yüz */}
       {faceHighlight[face]}
@@ -168,7 +198,11 @@ export default function MoveGuide({ move }) {
   const color = getMoveColor(move);
 
   const directionText =
-    modifier === "'" ? "Saat yönünün tersine" : modifier === "2" ? "180° döndür" : "Saat yönünde";
+    modifier === "'"
+      ? "Saat yönünün tersine"
+      : modifier === "2"
+        ? "180° döndür"
+        : "Saat yönünde";
 
   const faceText = {
     U: "ÜST",
@@ -198,7 +232,10 @@ export default function MoveGuide({ move }) {
             </span>
           </div>
           <div className="text-sm text-white/60 mb-1">
-            <span className="font-semibold text-white/80">{faceText[face]}</span> yüzü
+            <span className="font-semibold text-white/80">
+              {faceText[face]}
+            </span>{" "}
+            yüzü
           </div>
           <div className="flex items-center gap-2">
             <span className="text-lg">
