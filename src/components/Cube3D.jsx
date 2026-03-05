@@ -1,15 +1,25 @@
-import { useRef, useMemo } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, RoundedBox } from '@react-three/drei';
-import * as THREE from 'three';
-import { COLORS } from '../utils/cubeUtils';
+import { useRef, useMemo } from "react";
+import { Canvas, useFrame, extend } from "@react-three/fiber";
+import { OrbitControls } from "@react-three/drei";
+import { RoundedBoxGeometry } from "three-stdlib";
+import * as THREE from "three";
+import { COLORS } from "../utils/cubeUtils";
+
+extend({ RoundedBoxGeometry });
 
 const GAP = 0.08;
 const CUBIE_SIZE = 0.9;
 
 // Her küçük kübün 6 yüzündeki renk indekslerini hesapla
 function getCubieFaceColors(cubeState, x, y, z) {
-  const colors = ['#1a1a2e', '#1a1a2e', '#1a1a2e', '#1a1a2e', '#1a1a2e', '#1a1a2e'];
+  const colors = [
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+    "#1a1a2e",
+  ];
 
   // +x = R yüzü
   if (x === 1) {
@@ -67,13 +77,15 @@ function Cubie({ position, faceColors }) {
           color: new THREE.Color(color),
           roughness: 0.3,
           metalness: 0.1,
-        })
+        }),
     );
   }, [faceColors]);
 
   return (
     <mesh ref={meshRef} position={position} material={materials}>
-      <roundedBoxGeometry args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE, 4, 0.08]} />
+      <roundedBoxGeometry
+        args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE, 4, 0.08]}
+      />
     </mesh>
   );
 }
@@ -93,7 +105,11 @@ function CubeGroup({ cubeState }) {
       for (let y = -1; y <= 1; y++) {
         for (let z = -1; z <= 1; z++) {
           if (x === 0 && y === 0 && z === 0) continue;
-          const pos = [x * (CUBIE_SIZE + GAP), y * (CUBIE_SIZE + GAP), z * (CUBIE_SIZE + GAP)];
+          const pos = [
+            x * (CUBIE_SIZE + GAP),
+            y * (CUBIE_SIZE + GAP),
+            z * (CUBIE_SIZE + GAP),
+          ];
           const colors = getCubieFaceColors(cubeState, x, y, z);
           result.push({ pos, colors, key: `${x}_${y}_${z}` });
         }

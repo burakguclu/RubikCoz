@@ -1,10 +1,10 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
-import CubeNet from './components/CubeNet';
-import Cube3D from './components/Cube3D';
-import ColorPicker from './components/ColorPicker';
-import SolutionDisplay from './components/SolutionDisplay';
-import Timer from './components/Timer';
-import ScrambleDisplay from './components/ScrambleDisplay';
+import { useState, useCallback, useEffect, useRef } from "react";
+import CubeNet from "./components/CubeNet";
+import Cube3D from "./components/Cube3D";
+import ColorPicker from "./components/ColorPicker";
+import SolutionDisplay from "./components/SolutionDisplay";
+import Timer from "./components/Timer";
+import ScrambleDisplay from "./components/ScrambleDisplay";
 import {
   createSolvedCube,
   createEmptyCube,
@@ -14,21 +14,21 @@ import {
   applyMoves,
   parseMoves,
   generateScramble,
-} from './utils/cubeUtils';
-import { solveFromState } from './utils/solver';
+} from "./utils/cubeUtils";
+import { solveFromState } from "./utils/solver";
 
 function App() {
   const [cubeState, setCubeState] = useState(createEmptyCube);
   const [displayState, setDisplayState] = useState(null);
-  const [selectedColor, setSelectedColor] = useState('R');
+  const [selectedColor, setSelectedColor] = useState("R");
   const [solution, setSolution] = useState(null);
   const [solutionMoves, setSolutionMoves] = useState([]);
   const [currentStep, setCurrentStep] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isSolving, setIsSolving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [scramble, setScramble] = useState([]);
-  const [activeTab, setActiveTab] = useState('solve'); // 'solve' | 'timer'
+  const [activeTab, setActiveTab] = useState("solve"); // 'solve' | 'timer'
   const [solverReady, setSolverReady] = useState(false);
   const playIntervalRef = useRef(null);
   const baseCubeRef = useRef(null);
@@ -45,13 +45,13 @@ function App() {
         newState[face][index] = selectedColor;
         return newState;
       });
-      setError('');
+      setError("");
       setSolution(null);
       setSolutionMoves([]);
       setCurrentStep(0);
       setDisplayState(null);
     },
-    [selectedColor]
+    [selectedColor],
   );
 
   // Çöz butonu
@@ -62,7 +62,7 @@ function App() {
       return;
     }
 
-    setError('');
+    setError("");
     setIsSolving(true);
     setSolution(null);
     setSolutionMoves([]);
@@ -73,8 +73,8 @@ function App() {
       const stateStr = cubeStateToString(cubeState);
       const result = await solveFromState(stateStr);
 
-      if (!result || result.trim() === '') {
-        setSolution('Küp zaten çözülmüş!');
+      if (!result || result.trim() === "") {
+        setSolution("Küp zaten çözülmüş!");
         setSolutionMoves([]);
       } else {
         setSolution(result);
@@ -83,7 +83,7 @@ function App() {
         baseCubeRef.current = cubeState;
       }
     } catch (err) {
-      setError(err.message || 'Çözüm bulunamadı. Renkleri kontrol edin.');
+      setError(err.message || "Çözüm bulunamadı. Renkleri kontrol edin.");
     } finally {
       setIsSolving(false);
     }
@@ -147,7 +147,7 @@ function App() {
     setSolutionMoves([]);
     setCurrentStep(0);
     setIsPlaying(false);
-    setError('');
+    setError("");
   };
 
   // Çözülmüş küp
@@ -157,7 +157,7 @@ function App() {
     setSolution(null);
     setSolutionMoves([]);
     setCurrentStep(0);
-    setError('');
+    setError("");
   };
 
   // Karıştır
@@ -171,7 +171,7 @@ function App() {
     setSolution(null);
     setSolutionMoves([]);
     setCurrentStep(0);
-    setError('');
+    setError("");
   };
 
   // Renk sayıları
@@ -194,41 +194,46 @@ function App() {
         <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
           🧊 Rubik Küp Çözücü
         </h1>
-        <p className="text-white/50 text-sm mt-1">Küpünüzün renklerini girin, çözümü bulalım</p>
+        <p className="text-white/50 text-sm mt-1">
+          Küpünüzün renklerini girin, çözümü bulalım
+        </p>
       </header>
 
       {/* Tab bar */}
       <div className="flex justify-center gap-2 mb-6 px-4">
         <button
           className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${
-            activeTab === 'solve'
-              ? 'bg-white/20 text-white'
-              : 'bg-white/5 text-white/50 hover:bg-white/10'
+            activeTab === "solve"
+              ? "bg-white/20 text-white"
+              : "bg-white/5 text-white/50 hover:bg-white/10"
           }`}
-          onClick={() => setActiveTab('solve')}
+          onClick={() => setActiveTab("solve")}
         >
           🧩 Çözücü
         </button>
         <button
           className={`px-6 py-2 rounded-full font-semibold text-sm transition-all ${
-            activeTab === 'timer'
-              ? 'bg-white/20 text-white'
-              : 'bg-white/5 text-white/50 hover:bg-white/10'
+            activeTab === "timer"
+              ? "bg-white/20 text-white"
+              : "bg-white/5 text-white/50 hover:bg-white/10"
           }`}
-          onClick={() => setActiveTab('timer')}
+          onClick={() => setActiveTab("timer")}
         >
           ⏱ Zamanlayıcı
         </button>
       </div>
 
-      {activeTab === 'solve' ? (
+      {activeTab === "solve" ? (
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Sol Kolon: 2D Net + Kontroller */}
             <div className="space-y-4">
               {/* Renk Seçici */}
               <div className="glass-card p-4">
-                <ColorPicker selectedColor={selectedColor} onColorSelect={setSelectedColor} />
+                <ColorPicker
+                  selectedColor={selectedColor}
+                  onColorSelect={setSelectedColor}
+                />
                 {/* Renk sayıları */}
                 <div className="flex gap-3 justify-center mt-3 text-xs">
                   {Object.entries(colorCounts).map(([color, count]) => (
@@ -236,10 +241,10 @@ function App() {
                       key={color}
                       className={`px-2 py-1 rounded-md ${
                         count === 9
-                          ? 'bg-green-500/20 text-green-400'
+                          ? "bg-green-500/20 text-green-400"
                           : count > 9
-                          ? 'bg-red-500/20 text-red-400'
-                          : 'bg-white/10 text-white/60'
+                            ? "bg-red-500/20 text-red-400"
+                            : "bg-white/10 text-white/60"
                       }`}
                     >
                       {color}: {count}/9
@@ -260,7 +265,7 @@ function App() {
                   onClick={handleSolve}
                   disabled={isSolving}
                 >
-                  {isSolving ? '🔄 Çözülüyor...' : '🧠 Çöz'}
+                  {isSolving ? "🔄 Çözülüyor..." : "🧠 Çöz"}
                 </button>
                 <button className="btn-secondary" onClick={handleScramble}>
                   🔀 Karıştır
@@ -274,7 +279,10 @@ function App() {
               </div>
 
               {/* Karıştırma gösterimi */}
-              <ScrambleDisplay scramble={scramble} onNewScramble={handleScramble} />
+              <ScrambleDisplay
+                scramble={scramble}
+                onNewScramble={handleScramble}
+              />
 
               {/* Hata mesajı */}
               {error && (
@@ -332,7 +340,9 @@ function App() {
 
       {/* Footer */}
       <footer className="text-center mt-8 text-white/30 text-xs">
-        <p>Rubik Küp Çözücü © 2026 — Kociemba Algoritması ile güçlendirilmiştir</p>
+        <p>
+          Rubik Küp Çözücü © 2026 — Kociemba Algoritması ile güçlendirilmiştir
+        </p>
       </footer>
     </div>
   );

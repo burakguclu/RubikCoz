@@ -1,6 +1,6 @@
-import { COLORS } from '../utils/cubeUtils';
+import { COLORS } from "../utils/cubeUtils";
 
-const PALETTE = ['W', 'Y', 'R', 'O', 'B', 'G'];
+const PALETTE = ["W", "Y", "R", "O", "B", "G"];
 
 export default function ColorPicker({ selectedColor, onColorSelect }) {
   return (
@@ -9,7 +9,7 @@ export default function ColorPicker({ selectedColor, onColorSelect }) {
       {PALETTE.map((color) => (
         <button
           key={color}
-          className={`color-picker-btn ${selectedColor === color ? 'active' : ''}`}
+          className={`color-picker-btn ${selectedColor === color ? "active" : ""}`}
           style={{ backgroundColor: COLORS[color] }}
           onClick={() => onColorSelect(color)}
           title={color}

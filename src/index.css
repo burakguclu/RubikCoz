@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --color-white: #FFFFFF;
-  --color-yellow: #FFD500;
-  --color-red: #B71234;
-  --color-orange: #FF5800;
-  --color-blue: #0046AD;
-  --color-green: #009B48;
+  --color-white: #ffffff;
+  --color-yellow: #ffd500;
+  --color-red: #b71234;
+  --color-orange: #ff5800;
+  --color-blue: #0046ad;
+  --color-green: #009b48;
   --color-gray: #808080;
 }
 
@@ -17,7 +17,7 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
   min-height: 100vh;
   color: white;
@@ -25,13 +25,27 @@ body {
 }
 
 /* Cube Face Colors */
-.cube-color-W { background-color: var(--color-white); }
-.cube-color-Y { background-color: var(--color-yellow); }
-.cube-color-R { background-color: var(--color-red); }
-.cube-color-O { background-color: var(--color-orange); }
-.cube-color-B { background-color: var(--color-blue); }
-.cube-color-G { background-color: var(--color-green); }
-.cube-color-X { background-color: var(--color-gray); }
+.cube-color-W {
+  background-color: var(--color-white);
+}
+.cube-color-Y {
+  background-color: var(--color-yellow);
+}
+.cube-color-R {
+  background-color: var(--color-red);
+}
+.cube-color-O {
+  background-color: var(--color-orange);
+}
+.cube-color-B {
+  background-color: var(--color-blue);
+}
+.cube-color-G {
+  background-color: var(--color-green);
+}
+.cube-color-X {
+  background-color: var(--color-gray);
+}
 
 /* Color Picker Palette */
 .color-picker-btn {
@@ -182,8 +196,14 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .animate-fade-in {
@@ -191,8 +211,13 @@ body {
 }
 
 @keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(102, 126, 234, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8); }
+  0%,
+  100% {
+    box-shadow: 0 0 8px rgba(102, 126, 234, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.8);
+  }
 }
 
 .animate-pulse-glow {

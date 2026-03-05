@@ -1,5 +1,5 @@
 // Rubik Küp Çözücü - Kociemba Algoritması Wrapper
-import Cube from 'cubejs';
+import Cube from "cubejs";
 
 let initialized = false;
 
@@ -27,8 +27,8 @@ export function solveCube(facelets) {
     const solution = cube.solve();
     return solution;
   } catch (error) {
-    console.error('Çözüm hatası:', error);
-    throw new Error('Küp çözülemedi. Lütfen renkleri kontrol edin.');
+    console.error("Çözüm hatası:", error);
+    throw new Error("Küp çözülemedi. Lütfen renkleri kontrol edin.");
   }
 }
 

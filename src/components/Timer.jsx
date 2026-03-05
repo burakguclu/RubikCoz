@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 export default function Timer() {
   const [time, setTime] = useState(0);
@@ -38,7 +38,7 @@ export default function Timer() {
   // Space tuşu ile başlat/durdur
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.code === 'Space' && e.target === document.body) {
+      if (e.code === "Space" && e.target === document.body) {
         e.preventDefault();
         if (isRunning) {
           stop();
@@ -47,8 +47,8 @@ export default function Timer() {
         }
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isRunning, start, stop]);
 
   const formatTime = (ms) => {
@@ -56,12 +56,13 @@ export default function Timer() {
     const seconds = Math.floor((ms % 60000) / 1000);
     const centiseconds = Math.floor((ms % 1000) / 10);
     if (minutes > 0) {
-      return `${minutes}:${seconds.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
+      return `${minutes}:${seconds.toString().padStart(2, "0")}.${centiseconds.toString().padStart(2, "0")}`;
     }
-    return `${seconds}.${centiseconds.toString().padStart(2, '0')}`;
+    return `${seconds}.${centiseconds.toString().padStart(2, "0")}`;
   };
 
-  const average = times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
+  const average =
+    times.length > 0 ? times.reduce((a, b) => a + b, 0) / times.length : 0;
   const best = times.length > 0 ? Math.min(...times) : 0;
 
   return (
@@ -72,12 +73,14 @@ export default function Timer() {
       <div className="text-center mb-4">
         <div
           className={`text-5xl font-mono font-bold tracking-wider ${
-            isRunning ? 'text-green-400' : 'text-white'
+            isRunning ? "text-green-400" : "text-white"
           }`}
         >
           {formatTime(time)}
         </div>
-        <p className="text-xs text-white/40 mt-2">Space tuşu ile başlat/durdur</p>
+        <p className="text-xs text-white/40 mt-2">
+          Space tuşu ile başlat/durdur
+        </p>
       </div>
 
       {/* Buttons */}
@@ -95,7 +98,10 @@ export default function Timer() {
           🔄 Sıfırla
         </button>
         {times.length > 0 && (
-          <button className="btn-secondary text-sm" onClick={() => setTimes([])}>
+          <button
+            className="btn-secondary text-sm"
+            onClick={() => setTimes([])}
+          >
             🗑 Temizle
           </button>
         )}
@@ -107,7 +113,9 @@ export default function Timer() {
           <div className="flex justify-around text-sm mb-3">
             <div className="text-center">
               <div className="text-white/50">Ortalama</div>
-              <div className="font-bold text-blue-400">{formatTime(average)}</div>
+              <div className="font-bold text-blue-400">
+                {formatTime(average)}
+              </div>
             </div>
             <div className="text-center">
               <div className="text-white/50">En İyi</div>
