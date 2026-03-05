@@ -16,7 +16,7 @@ import {
   parseMoves,
   generateScramble,
 } from "./utils/cubeUtils";
-import { solveFromState } from "./utils/solver";
+import { solveFromState, initSolver } from "./utils/solver";
 
 function App() {
   const [cubeState, setCubeState] = useState(createEmptyCube);
@@ -37,6 +37,15 @@ function App() {
   const playIntervalRef = useRef(null);
   const baseCubeRef = useRef(null);
   const prevStepRef = useRef(0);
+
+  // Sayfa açılınca solver'ı arka planda başlat
+  useEffect(() => {
+    initSolver()
+      .then(() => setSolverReady(true))
+      .catch(() => {
+        /* ilk başlatma başarısız olursa, çöz butonunda tekrar denenir */
+      });
+  }, []);
 
   // Küp durumunu 3D'de göster
   const currentDisplayState = displayState || cubeState;
@@ -305,7 +314,11 @@ function App() {
                   onClick={handleSolve}
                   disabled={isSolving}
                 >
-                  {isSolving ? "🔄 Çözülüyor..." : "🧠 Çöz"}
+                  {isSolving
+                    ? "🔄 Çözülüyor..."
+                    : !solverReady
+                      ? "⏳ Hazırlanıyor..."
+                      : "🧠 Çöz"}
                 </button>
                 <button className="btn-secondary" onClick={handleScramble}>
                   🔀 Karıştır
