@@ -1,4 +1,4 @@
-import { useRef, useMemo } from "react";
+import { useRef, useMemo, useState, useEffect, useCallback } from "react";
 import { Canvas, useFrame, extend } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { RoundedBoxGeometry } from "three-stdlib";
@@ -9,138 +9,192 @@ extend({ RoundedBoxGeometry });
 
 const GAP = 0.08;
 const CUBIE_SIZE = 0.9;
+const UNIT = CUBIE_SIZE + GAP;
 
-// Her küçük kübün 6 yüzündeki renk indekslerini hesapla
+// Hamle -> döndürme ekseni ve yönü
+const MOVE_CONFIG = {
+  U:    { axis: [0, 1, 0], angle: -Math.PI / 2, filter: (_x, y) => y === 1 },
+  "U'": { axis: [0, 1, 0], angle:  Math.PI / 2, filter: (_x, y) => y === 1 },
+  U2:   { axis: [0, 1, 0], angle: -Math.PI,     filter: (_x, y) => y === 1 },
+  D:    { axis: [0, 1, 0], angle:  Math.PI / 2, filter: (_x, y) => y === -1 },
+  "D'": { axis: [0, 1, 0], angle: -Math.PI / 2, filter: (_x, y) => y === -1 },
+  D2:   { axis: [0, 1, 0], angle:  Math.PI,     filter: (_x, y) => y === -1 },
+  R:    { axis: [1, 0, 0], angle: -Math.PI / 2, filter: (x) => x === 1 },
+  "R'": { axis: [1, 0, 0], angle:  Math.PI / 2, filter: (x) => x === 1 },
+  R2:   { axis: [1, 0, 0], angle: -Math.PI,     filter: (x) => x === 1 },
+  L:    { axis: [1, 0, 0], angle:  Math.PI / 2, filter: (x) => x === -1 },
+  "L'": { axis: [1, 0, 0], angle: -Math.PI / 2, filter: (x) => x === -1 },
+  L2:   { axis: [1, 0, 0], angle:  Math.PI,     filter: (x) => x === -1 },
+  F:    { axis: [0, 0, 1], angle: -Math.PI / 2, filter: (_x, _y, z) => z === 1 },
+  "F'": { axis: [0, 0, 1], angle:  Math.PI / 2, filter: (_x, _y, z) => z === 1 },
+  F2:   { axis: [0, 0, 1], angle: -Math.PI,     filter: (_x, _y, z) => z === 1 },
+  B:    { axis: [0, 0, 1], angle:  Math.PI / 2, filter: (_x, _y, z) => z === -1 },
+  "B'": { axis: [0, 0, 1], angle: -Math.PI / 2, filter: (_x, _y, z) => z === -1 },
+  B2:   { axis: [0, 0, 1], angle:  Math.PI,     filter: (_x, _y, z) => z === -1 },
+};
+
 function getCubieFaceColors(cubeState, x, y, z) {
-  const colors = [
-    "#1a1a2e",
-    "#1a1a2e",
-    "#1a1a2e",
-    "#1a1a2e",
-    "#1a1a2e",
-    "#1a1a2e",
-  ];
-
-  // +x = R yüzü
-  if (x === 1) {
-    const row = 1 - y;
-    const col = 1 - z;
-    const idx = row * 3 + col;
-    colors[0] = COLORS[cubeState.R[idx]];
-  }
-  // -x = L yüzü
-  if (x === -1) {
-    const row = 1 - y;
-    const col = z + 1;
-    const idx = row * 3 + col;
-    colors[1] = COLORS[cubeState.L[idx]];
-  }
-  // +y = U yüzü
-  if (y === 1) {
-    const row = 1 - z;
-    const col = x + 1;
-    const idx = row * 3 + col;
-    colors[2] = COLORS[cubeState.U[idx]];
-  }
-  // -y = D yüzü
-  if (y === -1) {
-    const row = z + 1;
-    const col = x + 1;
-    const idx = row * 3 + col;
-    colors[3] = COLORS[cubeState.D[idx]];
-  }
-  // +z = F yüzü
-  if (z === 1) {
-    const row = 1 - y;
-    const col = x + 1;
-    const idx = row * 3 + col;
-    colors[4] = COLORS[cubeState.F[idx]];
-  }
-  // -z = B yüzü
-  if (z === -1) {
-    const row = 1 - y;
-    const col = 1 - x;
-    const idx = row * 3 + col;
-    colors[5] = COLORS[cubeState.B[idx]];
-  }
-
+  const colors = ["#1a1a2e", "#1a1a2e", "#1a1a2e", "#1a1a2e", "#1a1a2e", "#1a1a2e"];
+  if (x === 1)  colors[0] = COLORS[cubeState.R[(1 - y) * 3 + (1 - z)]];
+  if (x === -1) colors[1] = COLORS[cubeState.L[(1 - y) * 3 + (z + 1)]];
+  if (y === 1)  colors[2] = COLORS[cubeState.U[(1 - z) * 3 + (x + 1)]];
+  if (y === -1) colors[3] = COLORS[cubeState.D[(z + 1) * 3 + (x + 1)]];
+  if (z === 1)  colors[4] = COLORS[cubeState.F[(1 - y) * 3 + (x + 1)]];
+  if (z === -1) colors[5] = COLORS[cubeState.B[(1 - y) * 3 + (1 - x)]];
   return colors;
 }
 
-function Cubie({ position, faceColors }) {
-  const meshRef = useRef();
-
+function Cubie({ position, faceColors, highlighted }) {
   const materials = useMemo(() => {
     return faceColors.map(
       (color) =>
         new THREE.MeshStandardMaterial({
           color: new THREE.Color(color),
-          roughness: 0.3,
-          metalness: 0.1,
-        }),
+          roughness: 0.25,
+          metalness: 0.05,
+          emissive: highlighted ? new THREE.Color(color) : new THREE.Color("#000000"),
+          emissiveIntensity: highlighted ? 0.15 : 0,
+        })
     );
-  }, [faceColors]);
+  }, [faceColors, highlighted]);
 
   return (
-    <mesh ref={meshRef} position={position} material={materials}>
-      <roundedBoxGeometry
-        args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE, 4, 0.08]}
-      />
+    <mesh position={position} material={materials}>
+      <roundedBoxGeometry args={[CUBIE_SIZE, CUBIE_SIZE, CUBIE_SIZE, 4, 0.08]} />
     </mesh>
   );
 }
 
-function CubeGroup({ cubeState }) {
+// Animasyonlu yüz döndürme katmanı
+function AnimatedLayer({ cubies, moveConfig, animDuration, onComplete }) {
   const groupRef = useRef();
+  const progressRef = useRef(0);
+  const completedRef = useRef(false);
+  const axis = useMemo(() => new THREE.Vector3(...moveConfig.axis), [moveConfig]);
 
   useFrame((_, delta) => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15;
+    if (!groupRef.current || completedRef.current) return;
+    progressRef.current += delta / animDuration;
+
+    if (progressRef.current >= 1) {
+      groupRef.current.setRotationFromAxisAngle(axis, moveConfig.angle);
+      completedRef.current = true;
+      onComplete();
+      return;
     }
+
+    // Ease-in-out cubic
+    const t = progressRef.current;
+    const eased = t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    groupRef.current.setRotationFromAxisAngle(axis, moveConfig.angle * eased);
   });
 
-  const cubies = useMemo(() => {
+  return (
+    <group ref={groupRef}>
+      {cubies.map(({ pos, colors, key }) => (
+        <Cubie key={key} position={pos} faceColors={colors} highlighted={true} />
+      ))}
+    </group>
+  );
+}
+
+function CubeScene({ cubeState, currentMove, animDuration, onAnimComplete, highlightFace }) {
+  const [animating, setAnimating] = useState(false);
+  const [animMove, setAnimMove] = useState(null);
+  const animIdRef = useRef(0);
+
+  const allCubies = useMemo(() => {
     const result = [];
     for (let x = -1; x <= 1; x++) {
       for (let y = -1; y <= 1; y++) {
         for (let z = -1; z <= 1; z++) {
           if (x === 0 && y === 0 && z === 0) continue;
-          const pos = [
-            x * (CUBIE_SIZE + GAP),
-            y * (CUBIE_SIZE + GAP),
-            z * (CUBIE_SIZE + GAP),
-          ];
+          const pos = [x * UNIT, y * UNIT, z * UNIT];
           const colors = getCubieFaceColors(cubeState, x, y, z);
-          result.push({ pos, colors, key: `${x}_${y}_${z}` });
+          result.push({ pos, colors, key: `${x}_${y}_${z}`, x, y, z });
         }
       }
     }
     return result;
   }, [cubeState]);
 
+  useEffect(() => {
+    if (currentMove && MOVE_CONFIG[currentMove]) {
+      animIdRef.current += 1;
+      setAnimMove(currentMove);
+      setAnimating(true);
+    } else {
+      setAnimating(false);
+      setAnimMove(null);
+    }
+  }, [currentMove]);
+
+  const handleAnimComplete = useCallback(() => {
+    setAnimating(false);
+    setAnimMove(null);
+    onAnimComplete?.();
+  }, [onAnimComplete]);
+
+  const moveConfig = animMove ? MOVE_CONFIG[animMove] : null;
+  const layerCubies = [];
+  const staticCubies = [];
+
+  for (const cubie of allCubies) {
+    if (animating && moveConfig && moveConfig.filter(cubie.x, cubie.y, cubie.z)) {
+      layerCubies.push(cubie);
+    } else {
+      const isHighlighted = !animating && highlightFace && MOVE_CONFIG[highlightFace]
+        && MOVE_CONFIG[highlightFace].filter(cubie.x, cubie.y, cubie.z);
+      staticCubies.push({ ...cubie, highlighted: !!isHighlighted });
+    }
+  }
+
   return (
-    <group ref={groupRef} rotation={[Math.PI / 6, -Math.PI / 4, 0]}>
-      {cubies.map(({ pos, colors, key }) => (
-        <Cubie key={key} position={pos} faceColors={colors} />
+    <group rotation={[Math.PI / 6, -Math.PI / 4, 0]}>
+      {staticCubies.map(({ pos, colors, key, highlighted }) => (
+        <Cubie key={key} position={pos} faceColors={colors} highlighted={highlighted} />
+      ))}
+
+      {animating && moveConfig && (
+        <AnimatedLayer
+          key={`anim-${animIdRef.current}`}
+          cubies={layerCubies}
+          moveConfig={moveConfig}
+          animDuration={animDuration}
+          onComplete={handleAnimComplete}
+        />
+      )}
+
+      {!animating && layerCubies.map(({ pos, colors, key }) => (
+        <Cubie key={key} position={pos} faceColors={colors} highlighted={false} />
       ))}
     </group>
   );
 }
 
-export default function Cube3D({ cubeState }) {
+export default function Cube3D({ cubeState, currentMove, animDuration = 0.5, onAnimComplete, highlightFace }) {
   return (
-    <div className="w-full h-[350px] md:h-[400px]">
-      <Canvas camera={{ position: [4, 3, 4], fov: 45 }}>
-        <ambientLight intensity={0.6} />
-        <directionalLight position={[5, 5, 5]} intensity={0.8} />
-        <directionalLight position={[-5, -5, -5]} intensity={0.3} />
-        <CubeGroup cubeState={cubeState} />
+    <div className="w-full h-[350px] md:h-[420px]">
+      <Canvas camera={{ position: [4.5, 3.5, 4.5], fov: 42 }}>
+        <ambientLight intensity={0.7} />
+        <directionalLight position={[5, 8, 5]} intensity={0.9} />
+        <directionalLight position={[-5, -3, -5]} intensity={0.3} />
+        <pointLight position={[0, 5, 0]} intensity={0.3} color="#667eea" />
+        <CubeScene
+          cubeState={cubeState}
+          currentMove={currentMove}
+          animDuration={animDuration}
+          onAnimComplete={onAnimComplete}
+          highlightFace={highlightFace}
+        />
         <OrbitControls
           enableZoom={true}
           enablePan={false}
           minDistance={4}
           maxDistance={12}
           autoRotate={false}
+          dampingFactor={0.1}
+          enableDamping={true}
         />
       </Canvas>
     </div>

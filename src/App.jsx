@@ -3,6 +3,7 @@ import CubeNet from "./components/CubeNet";
 import Cube3D from "./components/Cube3D";
 import ColorPicker from "./components/ColorPicker";
 import SolutionDisplay from "./components/SolutionDisplay";
+import MoveGuide from "./components/MoveGuide";
 import Timer from "./components/Timer";
 import ScrambleDisplay from "./components/ScrambleDisplay";
 import {
@@ -30,6 +31,8 @@ function App() {
   const [scramble, setScramble] = useState([]);
   const [activeTab, setActiveTab] = useState("solve"); // 'solve' | 'timer'
   const [solverReady, setSolverReady] = useState(false);
+  const [speed, setSpeed] = useState(1.0);
+  const [animatingMove, setAnimatingMove] = useState(null);
   const playIntervalRef = useRef(null);
   const baseCubeRef = useRef(null);
 
@@ -95,20 +98,40 @@ function App() {
       const movesToApply = solutionMoves.slice(0, currentStep);
       const newState = applyMoves(baseCubeRef.current, movesToApply);
       setDisplayState(newState);
+
+      // Animasyon tetikle — mevcut adımın hamlesini animasyonla göster
+      if (currentStep > 0) {
+        // Animasyon önceki durumdan başlar, bu yüzden bir önceki durumu göstermeliyiz
+        const prevState = applyMoves(baseCubeRef.current, solutionMoves.slice(0, currentStep - 1));
+        setDisplayState(prevState);
+        setAnimatingMove(solutionMoves[currentStep - 1]);
+      } else {
+        setAnimatingMove(null);
+      }
     }
+  }, [currentStep, solutionMoves]);
+
+  // Animasyon tamamlandığında son durumu göster
+  const handleAnimComplete = useCallback(() => {
+    if (solutionMoves.length > 0 && baseCubeRef.current && currentStep > 0) {
+      const newState = applyMoves(baseCubeRef.current, solutionMoves.slice(0, currentStep));
+      setDisplayState(newState);
+    }
+    setAnimatingMove(null);
   }, [currentStep, solutionMoves]);
 
   // Otomatik oynatma
   useEffect(() => {
-    if (isPlaying && currentStep < solutionMoves.length) {
+    if (isPlaying && currentStep < solutionMoves.length && !animatingMove) {
+      const delay = Math.max(200, 1200 / speed);
       playIntervalRef.current = setTimeout(() => {
         setCurrentStep((prev) => prev + 1);
-      }, 800);
+      }, delay);
     } else if (isPlaying && currentStep >= solutionMoves.length) {
       setIsPlaying(false);
     }
     return () => clearTimeout(playIntervalRef.current);
-  }, [isPlaying, currentStep, solutionMoves.length]);
+  }, [isPlaying, currentStep, solutionMoves.length, speed, animatingMove]);
 
   const handlePlay = () => {
     if (currentStep >= solutionMoves.length) {
@@ -296,8 +319,23 @@ function App() {
             <div className="space-y-4">
               {/* 3D Küp */}
               <div className="glass-card p-2">
-                <Cube3D cubeState={currentDisplayState} />
+                <Cube3D
+                  cubeState={currentDisplayState}
+                  currentMove={animatingMove}
+                  animDuration={Math.max(0.15, 0.5 / speed)}
+                  onAnimComplete={handleAnimComplete}
+                  highlightFace={
+                    solutionMoves.length > 0 && currentStep < solutionMoves.length && !animatingMove
+                      ? solutionMoves[currentStep]
+                      : null
+                  }
+                />
               </div>
+
+              {/* Yön Rehberi — aktif hamle */}
+              {solutionMoves.length > 0 && currentStep > 0 && currentStep <= solutionMoves.length && (
+                <MoveGuide move={solutionMoves[currentStep - 1]} />
+              )}
 
               {/* Çözüm gösterimi */}
               {solution && (
@@ -311,6 +349,8 @@ function App() {
                   onReset={handleReset}
                   onPrev={handlePrev}
                   onNext={handleNext}
+                  speed={speed}
+                  onSpeedChange={setSpeed}
                 />
               )}
 
